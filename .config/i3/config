@@ -70,10 +70,11 @@ bindsym $mod+f exec firefox
 
 bindsym $mod+s exec flameshot
 # change focus
-bindsym $mod+h focus left
-bindsym $mod+l focus down
-bindsym $mod+k focus up
-bindsym $mod+j focus right
+# bindsym $mod+h focus left
+# bindsym $mod+l focus down
+# bindsym $mod+k focus up
+# bindsym $mod+j focus right
+
 # alternatively, you can use the cursor keys:
 bindsym $mod+Left focus left
 bindsym $mod+Down focus down
@@ -81,10 +82,12 @@ bindsym $mod+Up focus up
 bindsym $mod+Right focus right
 
 # move focused window
-bindsym $mod+Shift+h move left
-bindsym $mod+Shift+k move down
-bindsym $mod+Shift+l move up
-bindsym $mod+Shift+j move right
+# bindsym $mod+Shift+h move left
+# bindsym $mod+Shift+k move down
+# bindsym $mod+Shift+l move up
+# bindsym $mod+Shift+j move right
+
+
 
 # alternatively, you can use the cursor keys:
 bindsym $mod+Shift+Left move left
@@ -93,10 +96,10 @@ bindsym $mod+Shift+Up move up
 bindsym $mod+Shift+Right move right
 
 # split in horizontal orientation
-bindsym $mod+control+h split h
+bindsym $mod+h split h
 
 # split in vertical orientation
-bindsym $mod+control+v split v
+bindsym $mod+v split v
 
 # enter fullscreen mode for the focused container
 bindsym $mod+Shift+f fullscreen toggle
@@ -107,7 +110,7 @@ bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
 
 # toggle tiling / floating
-bindsym $mod+Shift+control+f floating toggle
+bindsym $mod+Control+f floating toggle
 
 # change focus between tiling / floating windows
 
@@ -175,10 +178,10 @@ mode "resize" {
         bindsym semicolon resize grow width 10 px or 10 ppt
 
         # same bindings, but for the arrow keys
-        bindsym Left resize shrink width 10 px or 10 ppt
-        bindsym Down resize grow height 10 px or 10 ppt
-        bindsym Up resize shrink height 10 px or 10 ppt
-        bindsym Right resize grow width 10 px or 10 ppt
+        bindsym Left resize shrink width 6 px or 6 ppt
+        bindsym Down resize grow height 6 px or 6 ppt
+        bindsym Up resize shrink height 6 px or 6 ppt
+        bindsym Right resize grow width 6 px or 6 ppt
 
         # back to normal: Enter or Escape or $mod+r
         bindsym Return mode "default"
@@ -229,3 +232,8 @@ exec xrandr --output  HDMI-1 --primary --rate 75 --scale 1.40x1.40 --panning 201
 
 bindsym Shift+z workspace prev
 bindsym Shift+x workspace next
+
+bindsym $mod+Shift+l exec ~/.config/i3/scripts/lock_blur.sh 
+
+for_window [title="Picture-in-Picture"] sticky enable, floating enable, border none
+
