@@ -13,7 +13,7 @@ set $mod Mod1
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
-font pango:Firacode 8
+font pango:Firacode Mono 8
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
@@ -35,7 +35,7 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 exec --no-startup-id nm-applet
 exec discord &
 exec flameshot &
-exec picom &
+# exec picom &
 # Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
@@ -51,13 +51,14 @@ floating_modifier $mod
 tiling_drag modifier titlebar
 
 # start a terminal
-bindsym $mod+Return exec kitty 
+bindsym $mod+Return exec alacritty 
 
 # kill focused window
-bindsym $mod+Shift+q kill
+bindsym $mod+q kill
 
 # start dmenu (a program launcher)
 bindsym $mod+d exec  rofi -show drun -theme ~/.config/rofi/themes/tofi.rasi
+bindsym $mod+c exec rofi -show calc -modi calc -now-show-match -no-sort -theme ~/.config/rofi/themes/tofi.rasi
 # A more modern dmenu replacement is rofi:
 # bindcode $mod+40 exec "rofi -modi drun,run -show drun"
 # There also is i3-dmenu-desktop which only displays applications shipping a
@@ -66,9 +67,8 @@ bindsym $mod+d exec  rofi -show drun -theme ~/.config/rofi/themes/tofi.rasi
 
 # explorer
 bindsym $mod+Control+e exec nautilus 
-bindsym $mod+f exec firefox
 
-bindsym $mod+s exec flameshot
+bindsym $mod+s exec flameshot gui
 # change focus
 # bindsym $mod+h focus left
 # bindsym $mod+l focus down
@@ -102,7 +102,7 @@ bindsym $mod+h split h
 bindsym $mod+v split v
 
 # enter fullscreen mode for the focused container
-bindsym $mod+Shift+f fullscreen toggle
+bindsym $mod+f fullscreen toggle
 
 # change container layout (stacked, tabbed, toggle split)
 #bindsym $mod+s layout stacking
@@ -110,7 +110,7 @@ bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
 
 # toggle tiling / floating
-bindsym $mod+Control+f floating toggle
+bindsym $mod+Shift+f floating toggle
 
 # change focus between tiling / floating windows
 
@@ -194,41 +194,51 @@ bindsym $mod+r mode "resize"
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 
-# Bordas das janelas focadas — roxo vibrante
-client.focused          #800080 #4b004b #ffffff #b266b2 #4b004b
-
-# Bordas das janelas não focadas — roxo escuro
-client.unfocused        #4b004b #2e002e #bbbbbb #7a007a #2e002e
-
-# Bordas de janelas urgentes — roxo avermelhado
-client.urgent           #990066 #660044 #ffffff #cc3399 #660044
-
-# Bordas de janelas focadas mas inativas — roxo médio
-client.focused_inactive #993399 #4b004b #dddddd #b266b2 #4b004b
+# # Bordas das janelas focadas — roxo vibrante
+# client.focused          #800080 #4b004b #ffffff #b266b2 #4b004b
+#
+# # Bordas das janelas não focadas — roxo escuro
+# client.unfocused        #4b004b #2e002e #bbbbbb #7a007a #2e002e
+#
+# # Bordas de janelas urgentes — roxo avermelhado
+# client.urgent           #990066 #660044 #ffffff #cc3399 #660044
+#
+# # Bordas de janelas focadas mas inativas — roxo médio
+# client.focused_inactive #993399 #4b004b #dddddd #b266b2 #4b004b
 
 
 bar {
-        status_command i3status | ~/Documentos/git/i3spotifystatus/pystatus.py
-        position top
-        font pango:monospace 12
-    colors {
-        background #000000      # fundo preto
-        statusline #d8bfd8
-        separator  #7a007a
-
-        # Workspaces com tema roxo
-        focused_workspace  #800080 #b266b2 #ffffff
-        active_workspace   #993399 #4b004b #ffffff
-        inactive_workspace #4b004b #2e002e #bbbbbb
-        urgent_workspace   #990066 #cc3399 #ffffff
-    }
+        status_command i3blocks 
+        position  bottom 
+        font pango:Firacode Mono 10
+    # colors {
+    #     background #000000      # fundo preto
+    #     statusline #d8bfd8
+    #     separator  #969696
+    #
+    #     # Workspaces com tema roxo
+    #     focused_workspace  #800080 #b266b2 #ffffff
+    #     active_workspace   #993399 #4b004b #ffffff
+    #     inactive_workspace #4b004b #2e002e #bbbbbb
+    #     urgent_workspace   #990066 #cc3399 #ffffff
+    # }
+# | ~/Documentos/git/i3spotifystatus/pystatus.py 
 }
-exec xinput --set-prop 16 "libinput Accel Profile Enabled" 0 1
-exec xinput --set-prop 16 "libinput Accel Speed" 0.3
-exec xset r rate 200 50
-exec feh --bg-scale ~/Documentos/git/import-configs/img/'marceline&jujuba.jpg'
+exec_always xinput --set-prop 14 "libinput Accel Profile Enabled" 0 1
+exec_always xinput --set-prop 14 "libinput Accel Speed" 0.3
+exec_always xset r rate 200 50
 
-exec xrandr --output  HDMI-1 --primary --rate 75 --scale 1.40x1.40 --panning 2016x1260
+## wallpapers
+#exec_always feh --bg-scale ~/Documentos/git/import-configs/img/wallpaper1.jpg
+# exec_always feh --bg-scale ~/Documentos/git/import-configs/img/wallpaper2.jpg
+exec_always feh --bg-scale ~/Documentos/git/import-configs/img/wallpaperdomeuamor.png
+#exec_always feh --bg-scale ~/Documentos/git/import-configs/img/wallpaper3.jpg
+#exec_always feh --bg-scale ~/Documentos/git/import-configs/img/wallpaper4.jpg
+#exec_always feh --bg-scale ~/Documentos/git/import-configs/img/wallpaper5.jpg
+
+
+
+exec xrandr --output  HDMI-0 --primary --rate 75 --scale 1.40x1.40 --panning 2016x1260
 
 bindsym Shift+z workspace prev
 bindsym Shift+x workspace next
@@ -237,3 +247,10 @@ bindsym $mod+Shift+l exec ~/.config/i3/scripts/lock_blur.sh
 
 for_window [title="Picture-in-Picture"] sticky enable, floating enable, border none
 
+for_window [class=".*"] border pixel 3
+default_floating_border normal
+default_border pixel 2
+
+exec_always redshift -P -O 4000
+
+bindsym $mod+Shift+Control+s sticky toggle
