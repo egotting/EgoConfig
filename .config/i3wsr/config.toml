@@ -1,0 +1,19 @@
+[icons]
+# font awesome
+discord = ""
+Code = ""
+Spotify = ""
+jetbrains-idea = ""
+firefox = ""
+Alacritty = ""
+st-256color = ""
+
+[aliases]
+discord = "discord"
+Code = "Code"
+Spotify = "Spotify"
+jetbrains-idea= "jetbrains-idea"
+firefox = "Firefox"
+Alacritty = "Alacritty"
+st-256color = "Terminal"
+

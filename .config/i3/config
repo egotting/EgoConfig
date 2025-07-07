@@ -10,10 +10,9 @@
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
 
 set $mod Mod1
-
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
-font pango:Firacode Mono 8
+font pango:Source Code Pro Semibold 11
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
@@ -33,6 +32,7 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 # NetworkManager is the most popular way to manage wireless networks on Linux,
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 exec --no-startup-id nm-applet
+exec_always --no-startup-id /usr/bin/i3wsr --icons awesome --config $HOME/.config/i3wsr/config.toml
 exec discord &
 exec flameshot &
 # exec picom &
@@ -55,6 +55,10 @@ bindsym $mod+Return exec alacritty
 
 # kill focused window
 bindsym $mod+q kill
+
+
+#shutdown rofi
+bindsym $mod+Shift+Return exec --no-startup-id ~/.config/rofi/scripts/rofi_power.sh 
 
 # start dmenu (a program launcher)
 bindsym $mod+d exec  rofi -show drun -theme ~/.config/rofi/themes/tofi.rasi
@@ -194,12 +198,6 @@ bindsym $mod+r mode "resize"
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 
-# # Bordas das janelas focadas — roxo vibrante
-# client.focused          #800080 #4b004b #ffffff #b266b2 #4b004b
-#
-# # Bordas das janelas não focadas — roxo escuro
-# client.unfocused        #4b004b #2e002e #bbbbbb #7a007a #2e002e
-#
 # # Bordas de janelas urgentes — roxo avermelhado
 # client.urgent           #990066 #660044 #ffffff #cc3399 #660044
 #
@@ -208,9 +206,9 @@ bindsym $mod+r mode "resize"
 
 
 bar {
-        status_command i3blocks 
-        position  bottom 
-        font pango:Firacode Mono 10
+        status_command i3blocks
+        position  top 
+        font pango:Source Code Pro Semibold, FontAwesome 13
     # colors {
     #     background #000000      # fundo preto
     #     statusline #d8bfd8
@@ -224,8 +222,9 @@ bar {
     # }
 # | ~/Documentos/git/i3spotifystatus/pystatus.py 
 }
-exec_always xinput --set-prop 14 "libinput Accel Profile Enabled" 0 1
-exec_always xinput --set-prop 14 "libinput Accel Speed" 0.3
+exec_always for id in $(xinput list | grep "pointer" | cut -d '=' -f 2 | cut -f 1); do xinput --set-prop $id 'libinput Accel Profile Enabled' 0, 1; done
+
+exec_always xinput --set-prop 13 "libinput Accel Speed" 0.4
 exec_always xset r rate 200 50
 
 ## wallpapers
@@ -247,10 +246,23 @@ bindsym $mod+Shift+l exec ~/.config/i3/scripts/lock_blur.sh
 
 for_window [title="Picture-in-Picture"] sticky enable, floating enable, border none
 
-for_window [class=".*"] border pixel 3
+#for_window [class=".*"] border pixel 3
+#for_window [class=".*"] show_label on
+for_window [class=".*"] border normal
+
+#new_window normal
+
 default_floating_border normal
 default_border pixel 2
 
 exec_always redshift -P -O 4000
 
 bindsym $mod+Shift+Control+s sticky toggle
+
+focus_follows_mouse yes
+show_marks yes
+
+
+exec --no-startup-id xsetroot -cursor_name left_ptr
+exec_always --no-startup-id xrdb -merge ~/.Xresources
+
