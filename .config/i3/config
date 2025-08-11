@@ -228,16 +228,16 @@ exec_always xinput --set-prop 13 "libinput Accel Speed" 0.4
 exec_always xset r rate 200 50
 
 ## wallpapers
-#exec_always feh --bg-scale ~/Documentos/git/import-configs/img/wallpaper1.jpg
-# exec_always feh --bg-scale ~/Documentos/git/import-configs/img/wallpaper2.jpg
-exec_always feh --bg-scale ~/Documentos/git/import-configs/img/wallpaperdomeuamor.png
-#exec_always feh --bg-scale ~/Documentos/git/import-configs/img/wallpaper3.jpg
-#exec_always feh --bg-scale ~/Documentos/git/import-configs/img/wallpaper4.jpg
-#exec_always feh --bg-scale ~/Documentos/git/import-configs/img/wallpaper5.jpg
+#exec_always feh --bg-scale diretorio_do_seu_walpaper
+# exec_always feh --bg-scale diretorio_do_seu_walpaper
+# exec_always feh --bg-scale diretorio_do_seu_walpaper
+#exec_always feh --bg-scale diretorio_do_seu_walpaper
+#exec_always feh --bg-scale diretorio_do_seu_walpaper
+#exec_always feh --bg-scale diretorio_do_seu_walpaper
 
 
-
-exec xrandr --output  HDMI-0 --primary --rate 75 --scale 1.40x1.40 --panning 2016x1260
+# VC PODE VER USANDO XRANDR
+#exec xrandr --output NOME_DO_SEU_MONITOR EX: HDMI-0  --primary --rate 75 --scale 1.40x1.40 --panning 2016x1260
 
 bindsym Shift+z workspace prev
 bindsym Shift+x workspace next
@@ -255,7 +255,8 @@ for_window [class=".*"] border normal
 default_floating_border normal
 default_border pixel 2
 
-exec_always redshift -P -O 4000
+# deixar o monitor com a parada pra n cansar os olhos a noite
+#exec_always redshift -P -O 4000
 
 bindsym $mod+Shift+Control+s sticky toggle
 
