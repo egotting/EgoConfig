@@ -266,4 +266,7 @@ show_marks yes
 
 exec --no-startup-id xsetroot -cursor_name left_ptr
 exec_always --no-startup-id xrdb -merge ~/.Xresources
+exec_always xmodmap -e "keycode 110 = BackSpace"
+exec_always xmodmap -e "keycode 112 = backslash bar"
+exec_always xmodmap -e "keycode 117 = Return"
 

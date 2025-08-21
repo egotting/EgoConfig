@@ -71,7 +71,6 @@ if __name__ == "__main__":
     print_line(read_line())
 
     while True:
-
         line, prefix = read_line(), ""
         # ignore comma at start of lines
         if line.startswith(","):
