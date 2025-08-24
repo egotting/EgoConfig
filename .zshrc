@@ -123,7 +123,8 @@ alias sudo='sudo -E -s'
 alias repo='cd ~/Documentos/repo/github.com/egotting/'
 alias isdk='asdf'
 alias javainit='spring boot start'
-
+alias up='docker compose up -d --build'
+alias down='docker compose down'
 
 source ./zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
@@ -138,5 +139,9 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
-#
+
+. "$HOME/.local/bin/env"
+source $HOME/.local/bin/env
+
 source ~/.config/scripts/keyremap.sh
+

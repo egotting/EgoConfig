@@ -1,0 +1,6 @@
+[font]
+size = 11.0
+normal = { family = "ComicShannsMono Nerd Font Mono", style = "Regular" }
+bold = { family = "ComicShannsMono Nerd Font Mono", style = "Bold" }
+italic = { family = "ComicShannsMono Nerd Font Mono", style = "Italic" }
+bold_italic = { family = "ComicShannsMono Nerd Font Mono", style = "Bold Italic" }
