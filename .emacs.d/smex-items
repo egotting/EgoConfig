@@ -1,0 +1,27 @@
+
+;; ----- smex-history -----
+(
+ eglot-java-upgrade-lsp-server
+ elpaca-ui-search
+ elpaca-manager
+ elpaca-info
+ elpaca-browse
+ elpaca-ui-live-update-mode
+ package-install
+)
+
+;; ----- smex-data -----
+(
+ (java-mode . 1)
+ (c-java-menu . 1)
+ (lsp-java-add-import . 7)
+ (elpaca-browse . 3)
+ (elpaca-manager . 3)
+ (elpaca-ui-search . 8)
+ (elcord-mode . 1)
+ (elpaca-ui-browse-package . 4)
+ (elpaca-ui-live-update-mode . 8)
+ (package-install . 1)
+ (elpaca-info . 1)
+ (eglot-java-upgrade-lsp-server . 1)
+)

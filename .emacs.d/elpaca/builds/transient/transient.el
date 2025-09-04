@@ -1,0 +1,1 @@
+/home/ego/.emacs.d/elpaca/repos/transient/lisp/transient.el

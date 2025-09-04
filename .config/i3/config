@@ -32,7 +32,7 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 # NetworkManager is the most popular way to manage wireless networks on Linux,
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 exec --no-startup-id nm-applet
-exec_always --no-startup-id /usr/bin/i3wsr --icons awesome --config $HOME/.config/i3wsr/config.toml
+#exec_always --no-startup-id /usr/bin/i3wsr --icons awesome --config $HOME/.config/i3wsr/config.toml
 exec discord &
 exec flameshot &
 exec_always picom &
@@ -207,9 +207,9 @@ bindsym $mod+r mode "resize"
 
 
 bar {
-        status_command i3blocks
-        position top 
-        font pango:Source Code Pro Semibold, FontAwesome 12
+        status_command i3status
+        position bottom 
+        font pango:Source Code Pro Semibold, FontAwesome 10
     # colors {
     #     background #000000      # fundo preto
     #     statusline #d8bfd8
@@ -225,7 +225,7 @@ bar {
 }
 exec_always for id in $(xinput list | grep "pointer" | cut -d '=' -f 2 | cut -f 1); do xinput --set-prop $id 'libinput Accel Profile Enabled' 0, 1; done
 
-exec_always xinput --set-prop 8 "libinput Accel Speed" 0.4
+exec_always xinput --set-prop 8 "libinput Accel Speed" 0.2
 exec_always xset r rate 200 50
 
 ## wallpapers
@@ -242,7 +242,6 @@ exec xrandr --output  HDMI-0 --primary --rate 75 --scale 1.40x1.40 --panning 201
 
 bindsym Shift+z workspace prev
 bindsym Shift+x workspace next
-
 bindsym $mod+Shift+l exec ~/.config/i3/scripts/lock_blur.sh 
 
 for_window [title="Picture-in-Picture"] sticky enable, floating enable, border none
@@ -250,6 +249,9 @@ for_window [class="Alacritty"] floating enable
 #for_window [class=".*"] border pixel 3
 #for_window [class=".*"] show_label on
 for_window [class=".*"] border normal
+
+#for_window [class="Alacritty" layout="tabbed"] title_format "NoTrans"
+
 
 #new_window normal
 
@@ -259,6 +261,8 @@ default_border pixel 2
 exec_always redshift -P -O 4000
 
 bindsym $mod+Shift+Control+s sticky toggle
+bindsym $mod+z exec boomer
+
 
 focus_follows_mouse yes
 show_marks yes
@@ -269,4 +273,5 @@ exec_always --no-startup-id xrdb -merge ~/.Xresources
 exec_always xmodmap -e "keycode 110 = BackSpace"
 exec_always xmodmap -e "keycode 112 = backslash bar"
 exec_always xmodmap -e "keycode 117 = Return"
+
 

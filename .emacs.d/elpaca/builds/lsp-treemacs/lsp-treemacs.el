@@ -1,0 +1,1 @@
+/home/ego/.emacs.d/elpaca/repos/lsp-treemacs/lsp-treemacs.el

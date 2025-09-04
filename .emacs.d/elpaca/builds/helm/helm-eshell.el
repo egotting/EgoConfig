@@ -1,0 +1,1 @@
+/home/ego/.emacs.d/elpaca/repos/helm/helm-eshell.el

@@ -1,0 +1,17 @@
+;;;; Emacs Bookmark Format Version 1;;;; -*- coding: utf-8-emacs; mode: lisp-data -*-
+;;; This format is meant to be slightly human-readable;
+;;; nevertheless, you probably don't want to edit it.
+;;; -*- End Of Bookmark File Format Version Stamp -*-
+(("i3"
+ (filename . "~/.config/i3/")
+ (front-context-string . "config\n  drwxr-x")
+ (rear-context-string . "32 set  2 12:25 ")
+ (position . 156)
+ (last-modified 26810 8219 552966 949000))
+("repo"
+ (filename . "~/Documentos/repo/github.com/egotting/")
+ (front-context-string . "anotations\n  drw")
+ (rear-context-string . "96 jul 31 15:03 ")
+ (position . 184)
+ (last-modified 26810 7172 28589 569000))
+)
