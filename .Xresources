@@ -1,0 +1,22 @@
+Xcursor.size: 18
+Xcursor.theme: MyCursor
+
+
+
+xterm*faceName: Iosevka
+xterm*faceSize: 18
+
+xterm*scrollBar: false
+xterm*rightScroll: false
+
+xterm*background: #1c1c1c
+xterm*foreground: #ABB2BF
+
+xterm*saveLines: 2000
+
+xterm*internalBorder: 0
+xterm*borderWidth: 0
+
+xterm*selectToClipboard: true
+xterm*disallowedPasteControls: 0
+xterm*allowPasteControls: true

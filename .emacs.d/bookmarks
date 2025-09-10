@@ -2,7 +2,13 @@
 ;;; This format is meant to be slightly human-readable;
 ;;; nevertheless, you probably don't want to edit it.
 ;;; -*- End Of Bookmark File Format Version Stamp -*-
-(("i3"
+(("emacs"
+ (filename . "~/.emacs.d/")
+ (front-context-string . "init.el\n  -rw-r-")
+ (rear-context-string . "1K set  9 15:33 ")
+ (position . 744)
+ (last-modified 26816 29447 410113 6000))
+("i3"
  (filename . "~/.config/i3/")
  (front-context-string . "config\n  drwxr-x")
  (rear-context-string . "32 set  2 12:25 ")

@@ -1,1 +1,1 @@
-#s(lsp-session ("/home/ego/Documentos/repo/github.com/egotting/impl_rinha2025") nil #s(hash-table test equal) #s(hash-table test equal) #s(hash-table test equal))
+#s(lsp-session ("/home/ego/Documentos/repo/github.com/egotting/plugin_obs" "/home/ego/Documentos/repo/github.com/egotting/microservice-ecommerce/FrontEnd" "/home/ego/Documentos/repo/github.com/egotting/impl_rinha2025") nil #s(hash-table test equal data (jdtls ("/home/ego/Documentos/repo/github.com/egotting/impl_rinha2025"))) #s(hash-table test equal) #s(hash-table test equal))

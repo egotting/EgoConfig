@@ -15,7 +15,8 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 # load a random theme each time Oh My Zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="macos-zsh-theme/macos-theme" # set by `omz`
+ZSH_THEME="ego" # set by `omz`
+#macos-zsh-theme/macos-theme
 #kali-like
 #aphrodite/aphrodite
 
@@ -125,7 +126,8 @@ alias isdk='asdf'
 alias javainit='spring boot start'
 alias up='docker compose up -d --build'
 alias down='docker compose down'
-
+alias flushdns='sudo resolvectl flush-caches'
+alias tmuxcommands='cat ~/Documentos/commands/commands.txt'
 source ./zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 export PATH=$PATH:/home/ego/.spicetify
@@ -144,4 +146,6 @@ esac
 source $HOME/.local/bin/env
 
 source ~/.config/scripts/keyremap.sh
+source ~/.config/scripts/resolution.sh
+source ~/.config/scripts/mouse_keyboard.sh
 

@@ -1,3 +1,51 @@
+(setq warning-minimum-level :error)
+(setq package-enable-at-startup nil)
+;(setq lsp-diagnostics-provider :none)
+(defvar elpaca-installer-version 0.11)
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                              :ref nil :depth 1 :inherit ignore
+                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+       (build (expand-file-name "elpaca/" elpaca-builds-directory))
+       (order (cdr elpaca-order))
+       (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (<= emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+        (if-let* ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                  ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                  ,@(when-let* ((depth (plist-get order :depth)))
+                                                      (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                  ,(plist-get order :repo) ,repo))))
+                  ((zerop (call-process "git" nil buffer t "checkout"
+                                        (or (plist-get order :ref) "--"))))
+                  (emacs (concat invocation-directory invocation-name))
+                  ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                        "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                  ((require 'elpaca))
+                  ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (let ((load-source-file-function nil)) (load "./elpaca-autoloads"))))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
+
+
+;; Ativa integração com use-package
+(elpaca elpaca-use-package
+  (elpaca-use-package-mode))
+
+
 ;; Configurações básicas da interface
 (setq inhibit-startup-message t)
 (tool-bar-mode -1)
@@ -7,24 +55,16 @@
 (show-paren-mode 1)
 (global-display-line-numbers-mode t)
 
-(setq custom-file "~/.emacs.custom.el")
 
-(add-to-list 'default-frame-alist '(font . "Iosevka-16"))
+(add-to-list 'default-frame-alist '(font . "Iosevka-14"))
 
 (eval-after-load 'zenburn
   (set-face-attribute 'line-number nil :inherit 'default))
-
+(set-face-attribute 'default nil :height 150)
 ;; Auto insert
 (auto-insert-mode 1)
 (setq auto-insert-query nil)
 
-;; ===========================
-;; Configurações externas (rc)
-;; ===========================
-(load "~/.emacs.rc/rc.el")
-(load "~/.emacs.rc/misc-rc.el")
-(load "~/.emacs.rc/org-mode-rc.el")
-(load "~/.emacs.rc/autocommit-rc.el")
 
 ;; ===========================
 ;; Ajustes de split de janela
@@ -68,87 +108,133 @@
                  go-mode-hook nim-mode-hook yaml-mode-hook porth-mode-hook))
   (add-hook hook 'rc/set-up-whitespace-handling))
 
-;; ===========================
-;; Ido + Smex
-;; ===========================
-(rc/require 'smex 'ido-completing-read+)
-(require 'ido-completing-read+)
-(ido-mode 1)
-(ido-everywhere 1)
-(ido-ubiquitous-mode 1)
-(global-set-key (kbd "M-x") 'smex)
-(global-set-key (kbd "C-c C-c M-x") 'execute-extended-command)
 
 ;; ===========================
-;; Pacotes (use-package)
+;; Keymaps
 ;; ===========================
-(use-package try :ensure t)
+(global-set-key (kbd "C-w") 'kill-ring-save)
+(global-set-key (kbd "C-S-w") 'kill-region)
+(global-set-key (kbd "C-s") 'save-buffer)
+(global-set-key (kbd "C-f") 'isearch-forward)
+(global-set-key (kbd "C-e") 'delete-window)
+(global-set-key (kbd "C-1") 'delete-other-windows)
+(global-set-key (kbd "C-2") 'split-window-below)
+(global-set-key (kbd "C-3") 'split-window-right)
+(global-set-key (kbd "C-4") 'zoom-window-zoom)
+(defun apagar-linha ()
+  (interactive)
+  (if (use-region-p)
+      (kill-region (region-beginning) (region-end))
+    (kill-whole-line)))
+(global-set-key (kbd "C-d") 'apagar-linha)
 
-(use-package elcord
-  :ensure t)
+(global-set-key (kbd "C-v") 'yank)
 
+(defun save-and-exit ()
+  "save and quit Emacs"
+  (interactive)
+  (save-some-buffers t)
+  (kill-emacs))
+(global-set-key (kbd "C-S-s") 'save-and-exit)
+
+
+(global-set-key (kbd "C-c b") 'helm-bookmarks)
+(global-set-key (kbd "C-c c") 'bookmark-set)
+(global-set-key (kbd "C-S-e") 'dired-jump)
+(global-set-key (kbd "C-S-f") 'helm-find-files)
+(global-set-key (kbd "M-x") 'helm-M-x)
+(global-set-key (kbd "M-<tab>") 'ace-window)
+(global-set-key (kbd "C-z") 'undo)
+(global-set-key (kbd "C-r") 'lsp-rename)
+(global-set-key (kbd "C->") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+(global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
+(global-set-key (kbd "C-\"") 'mc/skip-to-next-like-this)
+(global-set-key (kbd "C-:") 'mc/skip-to-previous-like-this)
+(global-set-key (kbd "C-.") 'lsp-java-add-import)
+
+;; ===========================
+;; Custom
+;; ===========================
+;; (custom-set-variables
+;;  '(custom-enabled-themes '(gruber-darker))
+;;  '(custom-safe-themes
+;;    '("01a9797244146bbae39b18ef37e6f2ca5bebded90d9fe3a2f342a9e863aaa4fd" default))
+;;  '(package-selected-packages nil))
+
+;; (custom-set-faces)
+
+
+
+;; Mostrar atalhos disponíveis
 (use-package which-key
-  :ensure t
-  :config (which-key-mode))
+  :diminish
+  :hook (after-init . which-key-mode))
 
+;; Autocompletar (Company consome LSP via CAPF)
 (use-package company
-  :ensure t
-  :init (global-company-mode)
+  :diminish
+  :hook (after-init . global-company-mode)
   :config
-  (setq company-idle-delay 0.1
-        company-minimum-prefix-length 1
-        company-selection-wrap-around t))
+  (setq company-minimum-prefix-length 1
+        company-idle-delay 0.0
+        company-backends '((company-capf company-files))))
 
+;; Snippets (apenas integração com LSP, sem duplicar)
+(use-package yasnippet
+  :hook (prog-mode . yas-minor-mode)
+  :config
+  (yas-reload-all))
+
+;; Linter (usar só Flycheck, desligar Flymake do LSP)
 (use-package flycheck
-  :ensure t
-  :init (global-flycheck-mode))
+  :hook (after-init . global-flycheck-mode))
 
+;; LSP base
 (use-package lsp-mode
-  :ensure t
-  :commands lsp
-  :hook ((python-mode java-mode js-mode typescript-mode c-mode c++-mode
-                      go-mode rust-mode ruby-mode) . lsp)
+  :commands (lsp lsp-deferred)
+  :hook (java-mode . lsp-deferred)
+  :init
+  (setq lsp-keymap-prefix "C-c l")
   :config
-  (setq lsp-prefer-flymake nil
-        lsp-enable-snippet t
-        lsp-keymap-prefix "C-c l"))
+  (setq lsp-auto-guess-root t
+        lsp-enable-server-download t
+        lsp-completion-provider :capf ;; integra com company
+        ;lsp-enable-snippet t
+        lsp-idle-delay 0.6))
 
+;; UI do LSP (apenas docs e sideline)
 (use-package lsp-ui
-  :ensure t
   :commands lsp-ui-mode
   :hook (lsp-mode . lsp-ui-mode)
   :config
   (setq lsp-ui-doc-enable t
         lsp-ui-sideline-enable t
-        lsp-ui-imenu-enable t
-        lsp-ui-peek-enable t))
+        lsp-ui-imenu-enable nil
+        lsp-ui-peek-enable nil))
+;(remove-hook 'lsp-mode-hook #'flycheck-mode)
 
+;; Java específico
+(use-package lsp-java
+  :after lsp
+  :hook (java-mode . lsp-deferred)
+  :config
+  (setq lsp-java-format-enabled t))
+
+;; Debug para Java
 (use-package dap-mode
-  :ensure t
   :after lsp-mode
   :config (dap-auto-configure-mode))
 
-(use-package ace-window :ensure t)
-(use-package projectile :ensure t)
-(use-package yasnippet :ensure t :config (yas-global-mode))
-(use-package hydra :ensure t)
-(use-package helm-lsp :ensure t)
-(use-package helm :ensure t)
-(use-package lsp-treemacs :ensure t)
-
-(use-package autoinsert
-  :ensure nil
-  :config (auto-insert-mode 1))
-
-(use-package lsp-java
-  :ensure t
-  :after lsp
-  :hook (java-mode . lsp)
+(use-package dap-java :after lsp-java
   :config
-  (setq lsp-java-format-enabled t)
-  (add-hook 'java-mode-hook
-            (lambda ()
-              (add-hook 'before-save-hook #'lsp-format-buffer nil t))))
+  (global-set-key (kbd "<f7>") 'dap-step-in)
+  (global-set-key (kbd "<f8>") 'dap-next)
+  (global-set-key (kbd "<f9>") 'dap-continue))
+
+;; Auto-insert para arquivos Java
+(use-package autoinsert
+  :init (auto-insert-mode 1))
 
 (defun my-java-package-name ()
   "Gera o package Java a partir do diretório do arquivo atual."
@@ -168,60 +254,44 @@
         (insert "public class " class-name " {\n\n")
         (insert "}\n")))))
 
-(use-package dap-java
-  :ensure nil
-  :after (lsp-java)
-  :config
-  (global-set-key (kbd "<f7>") 'dap-step-in)
-  (global-set-key (kbd "<f8>") 'dap-next)
-  (global-set-key (kbd "<f9>") 'dap-continue))
-
-(use-package transient :ensure t)
-(use-package magit :ensure t)
-
 ;; ===========================
-;; Keymaps
+;; Extras
 ;; ===========================
-(global-set-key (kbd "C-w") 'kill-ring-save)
-(global-set-key (kbd "C-S-w") 'kill-region)
-(global-set-key (kbd "C-s") 'save-buffer)
-(global-set-key (kbd "C-f") 'isearch-forward)
 
-(defun apagar-linha ()
-  (interactive)
-  (if (use-region-p)
-      (kill-region (region-beginning) (region-end))
-    (kill-whole-line)))
-(global-set-key (kbd "C-d") 'apagar-linha)
+(use-package helm
+  :init (helm-mode 1))
 
-(global-set-key (kbd "C-v") 'yank)
+(use-package helm-lsp :after (helm lsp-mode))
 
-(defun save-and-exit ()
-  "save and quit Emacs"
-  (interactive)
-  (save-some-buffers t)
-  (kill-emacs))
-(global-set-key (kbd "C-S-s") 'save-and-exit)
+(use-package lsp-treemacs :after lsp-mode)
 
-(global-set-key (kbd "C-S-e") 'dired-jump)
-(global-set-key (kbd "C-S-f") 'helm-find-files)
-(global-set-key (kbd "M-<tab>") 'ace-window)
-(global-set-key (kbd "C-z") 'undo)
-(global-set-key (kbd "C-r") 'lsp-rename)
-(global-set-key (kbd "C->") 'mc/mark-next-like-this)
-(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
-(global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
-(global-set-key (kbd "C-\"") 'mc/skip-to-next-like-this)
-(global-set-key (kbd "C-:") 'mc/skip-to-previous-like-this)
-(global-set-key (kbd "C-S-.") 'lsp-java-add-import)
+(use-package projectile :defer t)
 
-;; ===========================
-;; Custom
-;; ===========================
+(use-package ace-window :defer t)
+
+(use-package zoom-window :defer t)
+
+(use-package hydra :defer t)
+
+(use-package transient :defer t)
+
+(use-package magit :defer t)
+
+(use-package elcord :defer t)
+
+(use-package try :defer t)
 (custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(custom-enabled-themes '(gruber-darker))
  '(custom-safe-themes
-   '("01a9797244146bbae39b18ef37e6f2ca5bebded90d9fe3a2f342a9e863aaa4fd" default))
- '(package-selected-packages nil))
-
-(custom-set-faces)
+   '("01a9797244146bbae39b18ef37e6f2ca5bebded90d9fe3a2f342a9e863aaa4fd"
+     default)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

@@ -1,3 +1,5 @@
+(setq package-enable-at-startup nil)
+
 (defvar elpaca-installer-version 0.11)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
@@ -37,36 +39,32 @@
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
 
-
-;; Ativa integração com use-package
-(elpaca elpaca-use-package
-  (elpaca-use-package-mode))
+(use-package almost-mono-themes)
 
 
+(setq gc-cons-threshold (* 200 1024 1024)) ; 200 MB
 ;; Configurações básicas da interface
 (setq inhibit-startup-message t)
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (column-number-mode 1)
-;(show-paren-mode 1)
-(global-display-line-numbers-mode t)
+(show-paren-mode 1)
+;(global-display-line-numbers-mode t)
 
-(setq custom-file "~/.emacs.custom.el")
 
-(add-to-list 'default-frame-alist '(font . "Iosevka-16"))
+(add-to-list 'default-frame-alist '(font . "Iosevka-18"))
 
 (eval-after-load 'zenburn
   (set-face-attribute 'line-number nil :inherit 'default))
-
+(set-face-attribute 'default nil :height 150)
 ;; Auto insert
 (auto-insert-mode 1)
 (setq auto-insert-query nil)
 
-;; ===========================
-;; Configurações externas (rc)
-;; ===========================
+
 (load "~/.emacs.rc/rc.el")
+
 (load "~/.emacs.rc/misc-rc.el")
 (load "~/.emacs.rc/org-mode-rc.el")
 (load "~/.emacs.rc/autocommit-rc.el")
@@ -101,116 +99,22 @@
 ;; ===========================
 ;; Whitespace mode
 ;; ===========================
-(defun rc/set-up-whitespace-handling ()
-  (interactive)
-  (whitespace-mode 1)
-  (add-to-list 'write-file-functions 'delete-trailing-whitespace))
+;; Mostra apenas o final de linha com $
+(setq whitespace-style '(lines-tail newline-mark))
 
-(dolist (hook '(tuareg-mode-hook c++-mode-hook c-mode-hook simpc-mode-hook
-                 emacs-lisp-mode java-mode-hook lua-mode-hook rust-mode-hook
-                 scala-mode-hook markdown-mode-hook haskell-mode-hook
-                 python-mode-hook erlang-mode-hook asm-mode-hook fasm-mode-hook
-                 go-mode-hook nim-mode-hook yaml-mode-hook porth-mode-hook))
-  (add-hook hook 'rc/set-up-whitespace-handling))
+;; Define como o fim de linha deve aparecer
+(setq whitespace-display-mappings
+      '((newline-mark 10 [?$ 10]))) ;; mostra $ no final
+
+(global-whitespace-mode 1) ;; ou só (whitespace-mode 1) se quiser por buffer
 
 
-;; ===========================
-;; Pacotes (use-package)
-;; ===========================
-(use-package try :ensure t)
-
-(use-package which-key
-  :ensure t
-  :config (which-key-mode))
-
-(use-package company
-  :ensure t
-  :init (global-company-mode))
-
-(use-package flycheck
-  :ensure t
-  :init (global-flycheck-mode))
-
-(use-package lsp-mode
-  :ensure t
-  :commands lsp
-  :hook ((python-mode java-mode js-mode typescript-mode c-mode c++-mode
-                      go-mode rust-mode ruby-mode) . lsp)
-  :config
-  (setq lsp-prefer-flymake nil
-        lsp-enable-snippet t
-        lsp-keymap-prefix "C-c l"))
-
-(use-package lsp-ui
-  :ensure t
-  :commands lsp-ui-mode
-  :hook (lsp-mode . lsp-ui-mode)
-  :config
-  (setq lsp-ui-doc-enable t
-        lsp-ui-sideline-enable t
-        lsp-ui-imenu-enable t
-        lsp-ui-peek-enable t))
-
-(use-package dap-mode
-  :ensure t
-  :after lsp-mode
-  :config (dap-auto-configure-mode))
-
-(use-package ace-window :ensure t)
-(use-package zoom-window
-  :ensure t)
-(use-package projectile :ensure t)
-(use-package yasnippet :ensure t :config (yas-global-mode))
-(use-package hydra :ensure t)
-(use-package helm-lsp :ensure t)
-(use-package helm
-  :ensure t
-  :init
-  (helm-mode 1))
-(use-package lsp-treemacs :ensure t)
-
-(use-package autoinsert
-  :ensure nil
-  :config (auto-insert-mode 1))
-
-(use-package lsp-java
-  :ensure t
-  :after lsp
-  :hook (java-mode . lsp)
-  :config
-  (setq lsp-java-format-enabled t)
-  (add-hook 'java-mode-hook
-            (lambda ()
-              (add-hook 'before-save-hook #'lsp-format-buffer nil t))))
-(defun my-java-package-name ()
-  "Gera o package Java a partir do diretório do arquivo atual."
-  (let* ((file (file-name-directory (buffer-file-name)))
-         (src-root (expand-file-name "~/projetos/app/src/main/java/"))
-         (rel (file-relative-name file src-root)))
-    (when (not (string-match-p "\\.\\." rel))
-      (replace-regexp-in-string "/" "." (directory-file-name rel)))))
-
-
-(define-auto-insert
-  '("\\.java\\'" . "Java skeleton")
-  '((lambda ()
-      (let* ((package (my-java-package-name))
-             (class-name (file-name-base (buffer-file-name))))
-        (when package
-          (insert "package " package ";\n\n"))
-        (insert "public class " class-name " {\n\n")
-        (insert "}\n")))))
-
-(use-package dap-java
-  :ensure nil
-  :after (lsp-java)
-  :config
-  (global-set-key (kbd "<f7>") 'dap-step-in)
-  (global-set-key (kbd "<f8>") 'dap-next)
-  (global-set-key (kbd "<f9>") 'dap-continue))
-
-(use-package transient :ensure t)
-(use-package magit :ensure t)
+(require 'dired-x)
+(setq dired-omit-files
+      (concat dired-omit-files "\\|^\\..+$"))
+(setq-default dired-dwim-target t)
+(setq dired-listing-switches "-alh")
+(setq dired-mouse-drag-files t)
 
 ;; ===========================
 ;; Keymaps
@@ -219,7 +123,7 @@
 (global-set-key (kbd "C-S-w") 'kill-region)
 (global-set-key (kbd "C-s") 'save-buffer)
 (global-set-key (kbd "C-f") 'isearch-forward)
-(global-set-key (kbd "C-e") 'delete-window)
+(global-set-key (kbd "C-S-d") 'delete-window)
 (global-set-key (kbd "C-1") 'delete-other-windows)
 (global-set-key (kbd "C-2") 'split-window-below)
 (global-set-key (kbd "C-3") 'split-window-right)
@@ -240,6 +144,7 @@
   (kill-emacs))
 (global-set-key (kbd "C-S-s") 'save-and-exit)
 
+(setq helm-ff-transformer-show-only-basename nil)
 
 (global-set-key (kbd "C-c b") 'helm-bookmarks)
 (global-set-key (kbd "C-c c") 'bookmark-set)
@@ -259,10 +164,152 @@
 ;; ===========================
 ;; Custom
 ;; ===========================
-(custom-set-variables
- '(custom-enabled-themes '(gruber-darker))
- '(custom-safe-themes
-   '("01a9797244146bbae39b18ef37e6f2ca5bebded90d9fe3a2f342a9e863aaa4fd" default))
- '(package-selected-packages nil))
+;; (custom-set-variables
+;;  '(custom-enabled-themes '(gruber-darker))
+;;  '(custom-safe-themes
+;;    '("01a9797244146bbae39b18ef37e6f2ca5bebded90d9fe3a2f342a9e863aaa4fd" default))
+;;  '(package-selected-packages nil))
 
-(custom-set-faces)
+;; (custom-set-faces)
+
+
+
+;; Mostrar atalhos disponíveis
+(use-package which-key
+  :diminish
+  :hook (after-init . which-key-mode))
+
+
+(use-package lsp-mode
+  :ensure t
+  :hook
+  ((java-mode
+    python-mode
+    typescript-mode
+    js-mode
+    go-mode
+    c-mode
+    c++-mode
+    rust-mode) . lsp)
+  :commands (lsp lsp)
+  :config
+  (setq lsp-idle-delay 0.6
+        lsp-log-io nil
+        lsp-enable-symbol-highlighting t
+        lsp-headerline-breadcrumb-enable t
+        lsp-completion-provider :capf
+        lsp-prefer-flymake nil))
+
+
+
+;; ===========================
+;; Company (auto-complete)
+;; ===========================
+(use-package company
+  :ensure t
+  :hook (after-init . global-company-mode)
+  :config
+  (setq company-minimum-prefix-length 2
+        company-idle-delay 0.2))
+
+
+;; ===========================
+;; Java LSP (JDTLS)
+;; ===========================
+;; (use-package lsp-java
+;;   :ensure t
+;;   :after lsp
+;;   :config
+;;   (add-hook 'java-mode-hook #'lsp))
+
+
+;; (with-eval-after-load 'lsp-mode
+;;   (require 'lsp-intellij)
+;;   (add-hook 'java-mode-hook #'lsp-intellij-enable))
+
+;; Debug para Java
+(use-package dap-mode
+  :after lsp-mode
+  :config (dap-auto-configure-mode))
+
+(use-package dap-java :after lsp-java
+  :config
+  (global-set-key (kbd "<f7>") 'dap-step-in)
+  (global-set-key (kbd "<f8>") 'dap-next)
+  (global-set-key (kbd "<f9>") 'dap-continue))
+
+;; Auto-insert para arquivos Java
+(use-package autoinsert
+  :init (auto-insert-mode 1))
+
+(defun my-java-package-name ()
+  "Gera o package Java a partir do diretório do arquivo atual."
+  (let* ((file (file-name-directory (buffer-file-name)))
+         (src-root (expand-file-name "~/projetos/app/src/main/java/"))
+         (rel (file-relative-name file src-root)))
+    (when (not (string-match-p "\\.\\." rel))
+      (replace-regexp-in-string "/" "." (directory-file-name rel)))))
+
+(define-auto-insert
+  '("\\.java\\'" . "Java skeleton")
+  '((lambda ()
+      (let* ((package (my-java-package-name))
+             (class-name (file-name-base (buffer-file-name))))
+        (when package
+          (insert "package " package ";\n\n"))
+        (insert "public class " class-name " {\n\n")
+        (insert "}\n")))))
+
+;; ===========================
+;; Extras
+;; ===========================
+
+(use-package helm
+  :init (helm-mode 1))
+
+(use-package helm-lsp :after (helm lsp-mode))
+
+(use-package lsp-treemacs :after lsp-mode)
+
+(use-package projectile :defer t)
+
+(use-package ace-window :defer t)
+
+(use-package zoom-window :defer t)
+
+(use-package hydra :defer t)
+
+(use-package transient :defer t)
+
+(use-package magit :defer t)
+
+(use-package try :defer t)
+
+
+(require 'elcord)
+  (elcord-mode)
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-enabled-themes '(almost-mono-white))
+ '(custom-safe-themes
+   '("cbd85ab34afb47003fa7f814a462c24affb1de81ebf172b78cb4e65186ba59d2"
+     "8f5b54bf6a36fe1c138219960dd324aad8ab1f62f543bed73ef5ad60956e36ae"
+     "01a9797244146bbae39b18ef37e6f2ca5bebded90d9fe3a2f342a9e863aaa4fd"
+     default))
+ '(package-selected-packages
+   '(almost-mono-themes auto-complete auto-yasnippet company consult
+                        dash-functional eglot elcord flycheck
+                        gruber-darker-theme helm-lsp
+                        ido-completing-read+ lsp-intellij lsp-java
+                        lsp-ui magit multiple-cursors neotree
+                        org-cliplink projectile quelpa smex try)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
