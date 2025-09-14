@@ -1,1 +1,0 @@
-/home/ego/.emacs.d/elpaca/repos/eglot-java/eglot-java.el

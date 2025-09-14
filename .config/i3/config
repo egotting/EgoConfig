@@ -52,7 +52,7 @@ floating_modifier $mod
 tiling_drag modifier titlebar
 
 # start a terminal
-bindsym $mod+Return exec alacritty 
+bindsym $mod+Return exec alacritty
 
 # kill focused window
 bindsym $mod+q kill
@@ -71,7 +71,7 @@ bindsym $mod+c exec rofi -show calc -modi calc -now-show-match -no-sort -theme ~
 # bindcode $mod+40 exec --no-startup-id i3-dmenu-desktop
 
 # explorer
-bindsym $mod+Control+e exec nautilus 
+bindsym $mod+Control+e exec nautilus
 
 bindsym $mod+s exec flameshot gui
 # change focus
@@ -208,26 +208,9 @@ bindsym $mod+r mode "resize"
 
 bar {
         status_command i3status
-        position bottom 
+        position bottom
         font pango:Source Code Pro Semibold, FontAwesome 10
-    # colors {
-    #     background #000000      # fundo preto
-    #     statusline #d8bfd8
-    #     separator  #969696
-    #
-    #     # Workspaces com tema roxo
-    #     focused_workspace  #800080 #b266b2 #ffffff
-    #     active_workspace   #993399 #4b004b #ffffff
-    #     inactive_workspace #4b004b #2e002e #bbbbbb
-    #     urgent_workspace   #990066 #cc3399 #ffffff
-    # }
-# | ~/Documentos/git/i3spotifystatus/pystatus.py 
 }
-exec_always for id in $(xinput list | grep "pointer" | cut -d '=' -f 2 | cut -f 1); do xinput --set-prop $id 'libinput Accel Profile Enabled' 0, 1; done
-
-exec_always xinput --set-prop 8 "libinput Accel Speed" 0.2
-exec_always xset r rate 200 50
-
 ## wallpapers
 #exec_always feh --bg-scale ~/Documentos/git/import-configs/img/wallpaper1.jpg
 # exec_always feh --bg-scale ~/Documentos/git/import-configs/img/wallpaper2.jpg
@@ -236,13 +219,9 @@ exec_always feh --bg-scale ~/Documentos/git/import-configs/img/wallpapermeubem.p
 #exec_always feh --bg-scale ~/Documentos/git/import-configs/img/wallpaper4.jpg
 #exec_always feh --bg-scale ~/Documentos/git/import-configs/img/wallpaper5.jpg
 
-
-
-exec xrandr --output  HDMI-0 --primary --rate 75 --scale 1.40x1.40 --panning 2016x1260
-
 bindsym Shift+z workspace prev
 bindsym Shift+x workspace next
-bindsym $mod+Shift+l exec ~/.config/i3/scripts/lock_blur.sh 
+bindsym $mod+Shift+l exec ~/.config/i3/scripts/lock_blur.sh
 
 for_window [title="Picture-in-Picture"] sticky enable, floating enable, border none
 for_window [class="Alacritty"] floating enable
@@ -270,8 +249,8 @@ show_marks yes
 
 exec --no-startup-id xsetroot -cursor_name left_ptr
 exec_always --no-startup-id xrdb -merge ~/.Xresources
-exec_always xmodmap -e "keycode 110 = BackSpace"
-exec_always xmodmap -e "keycode 112 = backslash bar"
-exec_always xmodmap -e "keycode 117 = Return"
 
 
+exec_always --no-startup-id ~/.config/scripts/keyremap.sh
+exec_always --no-startup-id ~/.config/scripts/mouse_keyboard.sh
+exec_always --no-startup-id ~/.config/scripts/resolution.sh

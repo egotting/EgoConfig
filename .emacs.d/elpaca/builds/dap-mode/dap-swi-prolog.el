@@ -1,1 +1,0 @@
-/home/ego/.emacs.d/elpaca/repos/dap-mode/dap-swi-prolog.el

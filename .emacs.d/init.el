@@ -38,29 +38,52 @@
     (let ((load-source-file-function nil)) (load "./elpaca-autoloads"))))
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
-
-(use-package almost-mono-themes)
-
-
-(setq gc-cons-threshold (* 200 1024 1024)) ; 200 MB
-;; Configurações básicas da interface
 (setq inhibit-startup-message t)
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (column-number-mode 1)
+(global-display-line-numbers-mode 1)
 (show-paren-mode 1)
-;(global-display-line-numbers-mode t)
+(overwrite-mode 1)
 
 
-(add-to-list 'default-frame-alist '(font . "Iosevka-18"))
+;; Força Emacs a abrir buffer de compilação na vertical (lado direito)
+(setq display-buffer-alist
+      '(("\\*compilation\\*"
+         (display-buffer-in-side-window) ;; usa side-window
+         (side . right)                   ;; lado direito
+         (window-width . 80)              ;; largura inicial
+         (slot . 1)
+         (window-parameters . ((no-delete-other-windows . t)
+                               (no-other-window . t))))))
 
-(eval-after-load 'zenburn
-  (set-face-attribute 'line-number nil :inherit 'default))
-(set-face-attribute 'default nil :height 150)
-;; Auto insert
-(auto-insert-mode 1)
-(setq auto-insert-query nil)
+;; Mantém scroll automático
+(setq compilation-scroll-output t)
+
+;; Não fecha o buffer ao terminar
+(setq compilation-finish-functions nil)
+
+
+
+
+(set-face-attribute 'default nil :font "Iosevka-12")
+(add-to-list 'default-frame-alist '(font . "Iosevka-12"))
+
+
+
+(defun my/refresh-dired-after-file-create ()
+  "Se o arquivo foi criado com helm-find-files, atualiza o dired."
+  (when buffer-file-name
+    (let ((dir (file-name-directory buffer-file-name)))
+      (dolist (buf (buffer-list))
+        (with-current-buffer buf
+          (when (and (eq major-mode 'dired-mode)
+                     (string= (expand-file-name default-directory)
+                              (expand-file-name dir)))
+            (revert-buffer nil t)))))))
+
+(add-hook 'find-file-hook #'my/refresh-dired-after-file-create)
 
 
 (load "~/.emacs.rc/rc.el")
@@ -96,17 +119,43 @@
 (setq-default split-height-threshold  4
               split-width-threshold   160)
 
-;; ===========================
-;; Whitespace mode
-;; ===========================
-;; Mostra apenas o final de linha com $
-(setq whitespace-style '(lines-tail newline-mark))
 
-;; Define como o fim de linha deve aparecer
+
+
+;
+;    WHITESPACES
+;
+
+(require 'whitespace)
+(global-whitespace-mode 1)
+
+;; Mostrar espaços e fim de linha
+(setq whitespace-style '(face spaces trailing space-mark newline-mark))
+
+;; Configuração visual
 (setq whitespace-display-mappings
-      '((newline-mark 10 [?$ 10]))) ;; mostra $ no final
+      '((space-mark 32 [183] [46])   ;; espaço simples como ·
+        ;(newline-mark 10 [36 10])    ;; fim de linha como $ + newline
+        ))
 
-(global-whitespace-mode 1) ;; ou só (whitespace-mode 1) se quiser por buffer
+;; Configurar cores
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(company-scrollbar-bg ((t (:background "#1E1E1E"))) t)
+ '(company-scrollbar-fg ((t (:background "#555555"))) t)
+ '(company-tooltip ((t (:background "#2E2E2E" :foreground "#CCCCCC"))))
+ '(company-tooltip-annotation ((t (:foreground "#AAAAAA"))))
+ '(company-tooltip-common ((t (:foreground "#BBBBBB"))))
+ '(company-tooltip-selection ((t (:background "#3A3A3A" :foreground "#FFFFFF"))))
+ '(whitespace-space ((t (:foreground "gray18"))))
+ '(whitespace-trailing ((t (:background "light coral")))))
+
+
+
+
 
 
 (require 'dired-x)
@@ -121,22 +170,15 @@
 ;; ===========================
 (global-set-key (kbd "C-w") 'kill-ring-save)
 (global-set-key (kbd "C-S-w") 'kill-region)
-(global-set-key (kbd "C-s") 'save-buffer)
+
 (global-set-key (kbd "C-f") 'isearch-forward)
 (global-set-key (kbd "C-S-d") 'delete-window)
 (global-set-key (kbd "C-1") 'delete-other-windows)
 (global-set-key (kbd "C-2") 'split-window-below)
 (global-set-key (kbd "C-3") 'split-window-right)
 (global-set-key (kbd "C-4") 'zoom-window-zoom)
-(defun apagar-linha ()
-  (interactive)
-  (if (use-region-p)
-      (kill-region (region-beginning) (region-end))
-    (kill-whole-line)))
-(global-set-key (kbd "C-d") 'apagar-linha)
 
-(global-set-key (kbd "C-v") 'yank)
-
+(global-set-key (kbd "C-s") 'save-buffer)
 (defun save-and-exit ()
   "save and quit Emacs"
   (interactive)
@@ -144,35 +186,46 @@
   (kill-emacs))
 (global-set-key (kbd "C-S-s") 'save-and-exit)
 
+
+
+(defun apagar-linha ()
+  (interactive)
+  (if (use-region-p)
+      (kill-region (region-beginning) (region-end))
+    (kill-whole-line)))
+
+(global-set-key (kbd "C-v") 'yank)
+
+
 (setq helm-ff-transformer-show-only-basename nil)
 
-(global-set-key (kbd "C-c b") 'helm-bookmarks)
-(global-set-key (kbd "C-c c") 'bookmark-set)
-(global-set-key (kbd "C-S-e") 'dired-jump)
-(global-set-key (kbd "C-S-f") 'helm-find-files)
+;; HELM
+(global-set-key (kbd "C-h b") 'helm-bookmarks)
+(global-set-key (kbd "C-h h") 'helm-recentf)
+(global-set-key (kbd "C-h f") 'helm-find-files)
 (global-set-key (kbd "M-x") 'helm-M-x)
+
+(global-set-key (kbd "C-c c") 'bookmark-set)
+(global-set-key (kbd "C-c d") 'bookmark-delete)
+(global-set-key (kbd "C-S-e") 'dired-jump)
+
+
 (global-set-key (kbd "M-<tab>") 'ace-window)
 (global-set-key (kbd "C-z") 'undo)
-(global-set-key (kbd "C-r") 'lsp-rename)
+
 (global-set-key (kbd "C->") 'mc/mark-next-like-this)
 (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
 (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
 (global-set-key (kbd "C-\"") 'mc/skip-to-next-like-this)
 (global-set-key (kbd "C-:") 'mc/skip-to-previous-like-this)
+
+;; java Keymaps
 (global-set-key (kbd "C-.") 'lsp-java-add-import)
+(global-set-key (kbd "C-r") 'lsp-rename)
+(global-set-key (kbd "C-c f") 'lsp-format-buffer)
+(global-set-key (kbd "C-c g") 'lsp-goto-implementation)
 
-;; ===========================
-;; Custom
-;; ===========================
-;; (custom-set-variables
-;;  '(custom-enabled-themes '(gruber-darker))
-;;  '(custom-safe-themes
-;;    '("01a9797244146bbae39b18ef37e6f2ca5bebded90d9fe3a2f342a9e863aaa4fd" default))
-;;  '(package-selected-packages nil))
-
-;; (custom-set-faces)
-
-
+(global-set-key (kbd "S-`") 'shell-command)
 
 ;; Mostrar atalhos disponíveis
 (use-package which-key
@@ -186,46 +239,137 @@
   ((java-mode
     python-mode
     typescript-mode
+    ts-mode
     js-mode
     go-mode
     c-mode
     c++-mode
-    rust-mode) . lsp)
-  :commands (lsp lsp)
+    rust-mode
+    yaml-mode
+    prog-mode) . lsp)
+  :commands lsp
   :config
-  (setq lsp-idle-delay 0.6
-        lsp-log-io nil
-        lsp-enable-symbol-highlighting t
-        lsp-headerline-breadcrumb-enable t
-        lsp-completion-provider :capf
-        lsp-prefer-flymake nil))
+  (setq lsp-prefer-flymake nil)
+  (setq lsp-auto-guess-root t)
+  (setq lsp-server-install-dir "/usr/local/share/lsp-servers")
 
 
+  (defun my/lsp-auto-install ()
+    "Instala automaticamente o servidor LSP se não estiver presente."
+    (dolist (server (lsp--suggest-server-downloads))
+      (unless (lsp-server-present-p server)
+        (lsp-install-server server))))
 
-;; ===========================
-;; Company (auto-complete)
-;; ===========================
-(use-package company
+  (add-hook 'lsp-mode-hook #'my/lsp-auto-install))
+
+
+(use-package lsp-ui
   :ensure t
-  :hook (after-init . global-company-mode)
+  :commands lsp-ui-mode
+  :after lsp-mode
+  :hook (lsp-mode . lsp-ui-mode))
+
+
+
+
+
+
+;; typescript
+(use-package typescript-mode
+  :ensure t
+  :mode "\\.ts\\'"
+  :hook (typescript-mode . lsp))
+
+(use-package web-mode
+  :ensure t
+  :mode ("\\.tsx\\'" . web-mode)
+  :hook (web-mode . lsp)
   :config
-  (setq company-minimum-prefix-length 2
-        company-idle-delay 0.2))
+  (setq web-mode-enable-auto-quoting nil) ;; desativa auto-quoting, opcional
+  (setq web-mode-code-indent-offset 2)
+  (setq web-mode-markup-indent-offset 2))
+
+(use-package flyspell
+  :ensure t
+  :defer t)
 
 
-;; ===========================
-;; Java LSP (JDTLS)
-;; ===========================
-;; (use-package lsp-java
-;;   :ensure t
-;;   :after lsp
-;;   :config
-;;   (add-hook 'java-mode-hook #'lsp))
+;;yaml
+(use-package yaml-mode
+  :ensure t
+  :mode ("\\.ya?ml\\'" . yaml-mode)
+  :hook (yaml-mode . my/yaml-mode-setup))
+
+(defun my/yaml-mode-setup ()
+  "Configurações adicionais para YAML."
+  (setq yaml-indent-offset 2)
+  (flycheck-mode 1)
+  (company-mode 1))
+
+;; Java
+(use-package lsp-java
+  :after lsp
+  :config
+  (add-hook 'java-mode-hook 'lsp))
+(setq company-backends '(company-capf company-dabbrev company-files))
 
 
-;; (with-eval-after-load 'lsp-mode
-;;   (require 'lsp-intellij)
-;;   (add-hook 'java-mode-hook #'lsp-intellij-enable))
+
+;; lsp-idle-delay 0.6
+;;         lsp-log-io nil
+;;         lsp-enable-symbol-highlighting t
+;;         lsp-headerline-breadcrumb-enable t
+;;         lsp-completion-provider :capf
+
+;; -------------------------------
+;; Company-mode
+;; -------------------------------
+(use-package company
+  :hook (after-init . global-company-mode)   ;; ativa globalmente
+  :config
+  (setq company-idle-delay 0.2)             ;; tempo antes de aparecer sugestão
+  (setq company-minimum-prefix-length 1)    ;; começa a sugerir depois de 1 char
+  (setq company-tooltip-limit 10)           ;; max de sugestões na lista
+  (setq company-show-numbers t)             ;; mostra números para completar com M-1, M-2...
+  (setq company-tooltip-align-annotations t)
+  (setq company-require-match 'never)
+  (setq company-dabbrev-ignore-case t)
+  (setq company-dabbrev-downcase nil)
+  ;; Atalhos
+  (global-set-key (kbd "M-/") 'company-complete) ;; manualmente disparar
+  )
+
+;; Navegação dentro do menu
+(with-eval-after-load 'company
+
+  (define-key company-active-map (kbd "TAB") 'company-complete-selection)
+  (define-key company-active-map (kbd "<return>") 'company-complete-selection)
+  (define-key company-active-map (kbd "C-n") 'company-select-next)
+  (define-key company-active-map (kbd "C-p") 'company-select-previous))
+
+
+;; -------------------------------
+;; Backends recomendados
+;; -------------------------------
+(setq company-backends '(
+                         company-capf       ;; integração com lsp, tree-sitter
+                         company-files      ;; caminhos de arquivos
+                         company-keywords   ;; palavras-chave da linguagem
+                         company-dabbrev    ;; autocomplete de palavras do buffer
+                         ))
+
+;; -------------------------------
+;; Visual de tooltip
+;; -------------------------------
+(setq company-tooltip-minimum-width 20)  ; largura mínima
+(setq company-tooltip-maximum-width 80)  ; largura máxima
+
+
+
+;; -------------------------------
+;; Optional: mostrar número de sugestões
+;; -------------------------------
+(setq company-show-numbers t)
 
 ;; Debug para Java
 (use-package dap-mode
@@ -239,30 +383,46 @@
   (global-set-key (kbd "<f9>") 'dap-continue))
 
 ;; Auto-insert para arquivos Java
-(use-package autoinsert
-  :init (auto-insert-mode 1))
+(require 'autoinsert)
+(auto-insert-mode 1)
 
-(defun my-java-package-name ()
-  "Gera o package Java a partir do diretório do arquivo atual."
-  (let* ((file (file-name-directory (buffer-file-name)))
-         (src-root (expand-file-name "~/projetos/app/src/main/java/"))
-         (rel (file-relative-name file src-root)))
-    (when (not (string-match-p "\\.\\." rel))
-      (replace-regexp-in-string "/" "." (directory-file-name rel)))))
+(setq auto-insert-query nil) ;; não perguntar antes de inserir
 
-(define-auto-insert
-  '("\\.java\\'" . "Java skeleton")
-  '((lambda ()
-      (let* ((package (my-java-package-name))
-             (class-name (file-name-base (buffer-file-name))))
-        (when package
-          (insert "package " package ";\n\n"))
-        (insert "public class " class-name " {\n\n")
-        (insert "}\n")))))
+(defun my/java-package-name ()
+  "Gera o nome do pacote Java baseado no caminho do arquivo."
+  (let* ((file (buffer-file-name))
+         (src-root (locate-dominating-file file "src/main/java"))
+         (rel-path (file-relative-name file (concat src-root "src/main/java/")))
+         (pkg (file-name-directory rel-path)))
+    (when pkg
+      (replace-regexp-in-string "/" "." (directory-file-name pkg)))))
 
-;; ===========================
-;; Extras
-;; ===========================
+(defun my/java-template ()
+  "Insere template Java com package e escolha de tipo pelo número."
+  (interactive)
+  (let* ((filename (file-name-base (buffer-file-name))) ;; Nome do arquivo sem extensão
+         (classname filename)
+         (package (my/java-package-name))
+         (choice (read-number "Escolha (1=class, 2=interface, 3=record, 4=enum): ")))
+    ;; Inserir package se encontrado
+    (when package
+      (insert "package " package ";\n\n"))
+    ;; Inserir tipo baseado na escolha
+    (cond
+     ((= choice 1)
+      (insert "public class " classname " {\n\n}\n"))
+     ((= choice 2)
+      (insert "public interface " classname " {\n\n}\n"))
+     ((= choice 3)
+      (insert "public record " classname " () {\n\n}\n"))
+     ((= choice 4)
+      (insert "public enum " classname " {\n\n}\n"))
+     (t
+      (insert "// Tipo inválido, escolha 1=class, 2=interface, 3=record, 4=enum\n")))))
+
+(define-auto-insert "\\.java\\'" #'my/java-template)
+
+
 
 (use-package helm
   :init (helm-mode 1))
@@ -294,22 +454,21 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes '(almost-mono-white))
+ '(custom-enabled-themes '(gruber-darker))
  '(custom-safe-themes
-   '("cbd85ab34afb47003fa7f814a462c24affb1de81ebf172b78cb4e65186ba59d2"
+   '("9aa753a939d3e81b95f06680656d0d57b22296cbe67a0e938a008b20d2811abb"
+     "c5801b68568b59976a8e58104c40c9b052d46cca72e367c2e43c1f36a9e79abb"
+     "2614a89f7e54cd9512343a3efba0e084fb9568c38e11165d7109a887e924a970"
+     "227dd4519dd40777533a58f905dccb9ca61928aef9f52761c8194e2e8bbb5f8b"
+     "d0fd069415ef23ccc21ccb0e54d93bdbb996a6cce48ffce7f810826bb243502c"
+     "ffba0482d3548c9494e84c1324d527f73ea4e43fff8dfd0e48faa8fc6d5c2bc7"
+     "cbd85ab34afb47003fa7f814a462c24affb1de81ebf172b78cb4e65186ba59d2"
      "8f5b54bf6a36fe1c138219960dd324aad8ab1f62f543bed73ef5ad60956e36ae"
      "01a9797244146bbae39b18ef37e6f2ca5bebded90d9fe3a2f342a9e863aaa4fd"
      default))
- '(package-selected-packages
-   '(almost-mono-themes auto-complete auto-yasnippet company consult
-                        dash-functional eglot elcord flycheck
-                        gruber-darker-theme helm-lsp
-                        ido-completing-read+ lsp-intellij lsp-java
-                        lsp-ui magit multiple-cursors neotree
-                        org-cliplink projectile quelpa smex try)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+ '(elcord-editor-icon "doom_cute_icon")
+ '(elcord-mode t nil (elcord))
+ '(elcord-refresh-rate 3)
+ '(elcord-show-small-icon t)
+ '(package-selected-packages nil))
+

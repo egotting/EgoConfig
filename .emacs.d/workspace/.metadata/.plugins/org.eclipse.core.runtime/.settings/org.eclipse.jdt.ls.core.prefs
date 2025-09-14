@@ -1,8 +1,0 @@
-PREF_FILTER_TESTCODE=false
-eclipse.preferences.version=1
-java.project.resourceFilters=node_modules\:\:.metadata\:\:archetype-resources\:\:META-INF/maven
-m2e.disableTestClasspathFlag=false
-maven.multiModuleProjectDirectory=/home/ego/Documentos/repo/github.com/egotting/impl_rinha2025
-org.eclipse.jdt.ui.importorder=java;javax;com;org
-org.eclipse.jdt.ui.typefilter.enabled=java.awt.*;com.sun.*
-workspaceInitialized=true

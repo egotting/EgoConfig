@@ -1,1 +1,0 @@
-/home/ego/.emacs.d/elpaca/repos/lsp-java/lsp-java-boot.el

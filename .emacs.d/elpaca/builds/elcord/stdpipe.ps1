@@ -1,1 +1,0 @@
-/home/ego/.emacs.d/elpaca/repos/elcord/stdpipe.ps1

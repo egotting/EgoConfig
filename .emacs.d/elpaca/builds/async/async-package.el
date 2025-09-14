@@ -1,1 +1,0 @@
-/home/ego/.emacs.d/elpaca/repos/emacs-async/async-package.el

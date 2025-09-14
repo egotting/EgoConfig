@@ -1,1 +1,0 @@
-/home/ego/.emacs.d/elpaca/repos/bui/bui.el
