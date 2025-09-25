@@ -121,13 +121,15 @@ source $ZSH/oh-my-zsh.sh
 alias ls='ls -la --color=auto'
 alias grep='grep --color=auto'
 alias sudo='sudo -E -s'
-alias repo='cd ~/Documentos/repo/github.com/egotting/'
+alias repo='cd ~/Documentos/projects/'
 alias isdk='asdf'
 alias javainit='spring boot start'
 alias up='docker compose up -d --build'
 alias down='docker compose down'
 alias flushdns='sudo resolvectl flush-caches'
 alias tmuxcommands='cat ~/Documentos/commands/commands.txt'
+alias emc="emacs &"
+alias search="yay -Ss | fzf | xargs yay -S"
 source ./zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 export PATH=$PATH:/home/ego/.spicetify
@@ -145,7 +147,4 @@ esac
 . "$HOME/.local/bin/env"
 source $HOME/.local/bin/env
 
-source ~/.config/scripts/keyremap.sh
-source ~/.config/scripts/resolution.sh
-source ~/.config/scripts/mouse_keyboard.sh
 
